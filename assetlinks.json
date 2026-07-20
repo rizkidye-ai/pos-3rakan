@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.rakankupi.pos",
+        "sha256_cert_fingerprints": ["AC:41:C6:DC:8F:13:3A:16:03:0A:00:89:9C:60:AC:F8:29:46:39:E3:57:50:ED:13:AA:6F:87:78:B8:FC:E9:6C"]
+      }
+    }]
