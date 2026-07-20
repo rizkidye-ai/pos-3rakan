@@ -1,14 +1,34 @@
 {
-  "background_color": "#416594",
-  "dir": "ltr",
-  "display": "fullscreen",
   "name": "3 Rakan Kupi POS",
-  "orientation": "any",
-  "scope": "./",
   "short_name": "3RakanKupi",
-  "start_url": "./",
-  "theme_color": "#142ebb",
-  "description": "Aplikasi kasir warung kopi 3 Rakan Kupi",
-  "id": "./",
-  "lang": "id"
+  "description": "Aplikasi kasir dan manajemen warung kopi 3 Rakan Kupi",
+  "start_url": "/pos-3rakan/",
+  "scope": "/pos-3rakan/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "lang": "id",
+  "dir": "ltr",
+  "background_color": "#20344f",
+  "theme_color": "#20344f",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }
