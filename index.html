@@ -452,6 +452,13 @@
 .dash-low{margin-top:16px;background:#fff8f3;border:1px solid #f4d4bd;border-radius:14px;padding:14px 16px}
 .dash-low h4{margin:0 0 10px;font-size:13px;color:#c25a1f}
 .dash-low-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #f0dcc8;font-size:13px}
+.wc-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 16px}
+.wc-l{font-size:12px;color:#9fb4d4;font-weight:600;margin-bottom:6px}
+.wc-v{font-size:21px;font-weight:800;color:#fff;line-height:1.1}
+.wc-s{font-size:11px;color:#7f95b8;margin-top:3px}
+.wc-chart{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px}
+.wc-chart h4{margin:0 0 12px;font-size:13px;color:#fff;font-weight:700}
+.wc-chart canvas{max-height:220px}
 </style>
 </head>
 <body>
@@ -1072,6 +1079,25 @@
     </div>
   </div>
 </div>
+<!-- WELCOME SETELAH LOGIN -->
+<div id="welcomeScreen" class="hidden" style="position:fixed;inset:0;z-index:9000;background:linear-gradient(160deg,#1c2f4e,#25324a);overflow-y:auto;padding:24px">
+  <div style="max-width:920px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:22px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div id="wcLogo" style="width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:28px">☕</div>
+        <div>
+          <div id="wcShop" style="color:#fff;font-size:20px;font-weight:800">3 Rakan Kupi</div>
+          <div id="wcHello" style="color:#9fb4d4;font-size:13px">Selamat datang</div>
+        </div>
+      </div>
+      <button onclick="skipWelcome()" style="background:#c2703c;color:#fff;border:none;border-radius:12px;padding:12px 22px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(194,112,60,.4)">Masuk ke Kasir →</button>
+    </div>
+    <div id="wcBody"></div>
+    <div style="text-align:center;margin-top:24px;padding-bottom:16px">
+      <button onclick="skipWelcome()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:14px 40px;font-size:16px;font-weight:700;cursor:pointer">Lewati / Masuk →</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -1158,6 +1184,7 @@ async function enterApp(){
   state.openToday=(data.openToday!==undefined)?data.openToday:null;
   if(state.openToday==null)setTimeout(()=>toast("💰 Belum catat modal awal laci — ☰ Menu → Buka Kas"),1600);
   startClock();renderAll();updateDebtBadge();
+  setTimeout(showWelcome,200);
 }
 function logout(){location.reload();}
 function startClock(){const el=document.getElementById("hdrClock");const t=()=>el.textContent="📅 "+fmtFull(new Date());t();setInterval(t,1000);}
@@ -3127,6 +3154,61 @@ function renderKk(){
 }
 /* ---------- DASHBOARD ---------- */
 let dashCharts=[];
+/* ---------- WELCOME SETELAH LOGIN ---------- */
+let wcCharts=[];
+function skipWelcome(){
+  wcCharts.forEach(c=>{try{c.destroy();}catch(e){}});wcCharts=[];
+  document.getElementById("welcomeScreen").classList.add("hidden");
+}
+async function showWelcome(){
+  const sc=document.getElementById("welcomeScreen");
+  const shop=state.shop||{};
+  document.getElementById("wcShop").textContent=shop.name||"3 Rakan Kupi";
+  const jam=new Date().getHours();
+  const salam=jam<11?"Selamat pagi":jam<15?"Selamat siang":jam<19?"Selamat sore":"Selamat malam";
+  document.getElementById("wcHello").textContent=salam+", "+state.user.name+" 👋";
+  if(shop.logo){document.getElementById("wcLogo").innerHTML=`<img src="${shop.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;}
+  sc.classList.remove("hidden");
+  const body=document.getElementById("wcBody");
+
+  if(!isAdmin()){
+    // KASIR/KARYAWAN: sambutan + profil toko saja (tanpa angka)
+    body.innerHTML=`
+      <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:28px;text-align:center;color:#fff">
+        <div style="font-size:44px;margin-bottom:10px">☕</div>
+        <div style="font-size:19px;font-weight:800;margin-bottom:6px">Selamat bekerja, ${state.user.name}!</div>
+        <div style="color:#9fb4d4;font-size:14px;line-height:1.7">${shop.name||"3 Rakan Kupi"}<br>${shop.addr||""}</div>
+        <div style="margin-top:16px;color:#c9d6ea;font-size:13px">📅 ${new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+      </div>
+      <div style="margin-top:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;color:#c9d6ea;font-size:13px;line-height:1.7">
+        💡 <b style="color:#fff">Ingat:</b> Buka Kas dulu sebelum jualan · Setiap transaksi dicatat · Tutup Kas di akhir shift.
+      </div>`;
+    return;
+  }
+
+  // OWNER/ADMIN: dashboard angka
+  body.innerHTML='<div style="color:#9fb4d4;text-align:center;padding:30px">memuat ringkasan...</div>';
+  let d;
+  try{d=await run("getDashboard",state.token);}catch(e){body.innerHTML='<div style="color:#e88;text-align:center;padding:20px">Gagal memuat ringkasan.</div>';return;}
+  const rpS=n=>"Rp "+(Number(n)||0).toLocaleString("id-ID");
+  const c=d.cards;
+  body.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px">
+      <div class="wc-card"><div class="wc-l">💰 Omzet Hari Ini</div><div class="wc-v">${rpS(c.omzet)}</div><div class="wc-s">${c.tx} transaksi</div></div>
+      <div class="wc-card"><div class="wc-l">💵 Kas Laci</div><div class="wc-v">${rpS(c.kasLaci)}</div></div>
+      <div class="wc-card"><div class="wc-l">📦 Stok Menipis</div><div class="wc-v">${c.lowCount}</div><div class="wc-s">perlu restock</div></div>
+      <div class="wc-card"><div class="wc-l">📋 Piutang</div><div class="wc-v">${rpS(c.piutang)}</div><div class="wc-s">${c.piutangCount} orang</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px">
+      <div class="wc-chart"><h4>📈 Omzet 7 Hari</h4><canvas id="wc7"></canvas></div>
+      <div class="wc-chart"><h4>🏆 Terlaris (7 hari)</h4><canvas id="wcTop"></canvas></div>
+    </div>`;
+  const coffee="#c2703c",navy="#4a6da8",grid="rgba(255,255,255,.08)";
+  const shortD=k=>{const p=k.split("-");return p[2]+"/"+p[1];};
+  Chart.defaults.color="#9fb4d4";
+  wcCharts.push(new Chart(document.getElementById("wc7"),{type:"line",data:{labels:d.chart7.map(x=>shortD(x.d)),datasets:[{data:d.chart7.map(x=>x.v),borderColor:coffee,backgroundColor:"rgba(194,112,60,.15)",fill:true,tension:.35,pointRadius:3,pointBackgroundColor:coffee}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:grid},ticks:{callback:v=>(v/1000)+"k"}},x:{grid:{display:false}}}}}));
+  wcCharts.push(new Chart(document.getElementById("wcTop"),{type:"bar",data:{labels:d.topProduk.map(x=>x.name),datasets:[{data:d.topProduk.map(x=>x.qty),backgroundColor:navy,borderRadius:6}]},options:{indexAxis:"y",plugins:{legend:{display:false}},scales:{x:{grid:{color:grid}},y:{grid:{display:false}}}}}));
+}
 function openDashboard(){
   if(!isAdmin()){toast("Khusus Admin/Owner");return;}
   document.getElementById("dashOverlay").classList.remove("hidden");
